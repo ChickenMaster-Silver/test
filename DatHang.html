@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css" type="text/css" />
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<title>Đặt đồ ăn trực tuyến</title>
+
+</head>
+
+<body>
+    <div>
+        <header>
+            <nav>
+                <ul>
+                    <li>
+                        <h1>FoodKun</h1>
+                    </li>
+                    <li><a href="TrangChu.html">Trang Chủ</a></li>
+                    <li><a href="QuanLimonAn.html">Món Ăn</a></li>
+                    <li><a href="DatHang.html">Đặt Hàng</a></li>
+                    <li>
+                        <form>
+                            <input class="search" type="text" id="searchInput" placeholder="Tìm kiếm...">
+                            <button class="button" type="submit">Tìm kiếm</button>
+                        </form>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropbtn">Tài khoản</a>
+                        <div class="dropdown-content">
+                            <a href="#">Đăng nhập</a><br>
+                            <a href="#">Đăng ký</a>
+                        </div>
+                    </li>
+                    <li><img class="img"
+                            src="https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg" /></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <br>
+            <center>
+                <h1>Trang Đặt Hàng</h1>
+            </center>
+            <h2 style="margin-left: 20px; color: rgb(30, 169, 239);"></h2>
+
+            <div class="width" id="danhsachmonan">
+
+
+            </div>
+
+            <div id="orderArea">
+                <h2>Đặt hàng</h2>
+                <form>
+                    <label for="id">ID</label>
+                    <input class="Osearch" type="text" id="id" required>
+
+                    <label for="name">Họ và tên:</label>
+                    <input class="Osearch" type="text" id="name" required>
+
+                    <label for="address">Địa chỉ:</label>
+                    <input class="Osearch" type="text" id="address" required>
+
+                    <label for="foodname">Tên Món Ăn:</label>
+                    <input class="Osearch" type="text" id="namefood" required>
+
+                    <label for="price">Giá tiền:</label>
+                    <input class="Osearch" type="number" id="price" required>
+
+                    <label for="quantity">Số lượng:</label>
+                    <input class="Osearch" type="number" id="quantity" required>
+
+                    <label for="phone">Số điện thoại:</label>
+                    <input class="Osearch" type="tel" id="phone" required>
+
+                    <button class="button001" type="submit">Đặt hàng</button>
+                </form>
+            </div>
+            <div class="tabledathang">
+                <center>
+                    <h2>Danh sách đặt hàng</h2>
+                </center>
+                <table id="table1">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Khách Hàng</th>
+                            <th>Địa chỉ</th>
+                            <th>Tên món</th>
+                            <th>Giá tiền</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+
+
+        </main>
+        <script>
+
+
+            // đặt hàng đọc dữ liệu từ file json ra ngoài
+            loadDatHang();
+            function loadDatHang() {
+                $.get("http://localhost:3000/dathang", function (data, status) {
+                    var tbody = $('#table1');
+                    tbody.empty();
+                    for (var i = 0; i < data.length; i++) {
+                        tbody.append("<td>" + data[i].id + "</td>");
+                        tbody.append("<td>" + data[i].name + "</td>");
+                        tbody.append("<td>" + data[i].diachi + "</td>");
+                        tbody.append("<td>" + data[i].namefood + "</td>");
+                        tbody.append("<td>" + data[i].price + "</td>");
+                    }
+                });
+
+            }
+
+            function DatHAng() {
+                var id = $('#id').val();
+                var name = $('#name').val();
+                var diachi = $('#diachi').val();
+                var price = $('#price').val();
+                var namefood = $('namefood').val();
+
+                var dh = {
+                    id: id,
+                    name: name,
+                    diachi: diachi,
+                    namefood: namefood,
+                    price: price,
+                };
+
+                $.ajax({
+                    url: 'http://localhost:3000/dathang',
+                    type: 'POST',
+                    data: JSON.stringify(dh),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        console.log(response);
+                        var tbody = $("<tr>");
+                        tbody.append("<td>" + response.id + "</td>");
+                        tbody.append("<td>" + response.name + "</td>");
+                        tbody.append("<td>" + response.diachi + "</td>");
+                        tbody.append("<td>" + response.namefood + "</td>");
+                        tbody.append("<td>" + response.price + "</td>");
+                        $('#tableBody').append(tbody);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            }
+
+
+        </script>
+    </div>

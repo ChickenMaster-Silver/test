@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý món ăn</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+
+    <style>
+        /* CSS được bổ sung để tạo khung cho phần sửa đổi */
+        #editForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            z-index: 1000;
+            border: 1px solid #ccc;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #editForm label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #editForm input,
+        #editForm textarea {
+            width: calc(100% - 22px);
+            margin-bottom: 15px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        #editForm button {
+            background-color: #4caf50;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <ul>
+                <li>
+                    <h1>FoodKun</h1>
+                </li>
+                <li><a href="TrangChu.html">Trang Chủ</a></li>
+                <li><a href="QuanLimonAn.html">Món Ăn</a></li>
+                <li><a href="DatHang.html">Đặt Hàng</a></li>
+                <li>
+                    <form>
+                        <input class="search" type="text" id="searchInput" placeholder="Tìm kiếm...">
+                        <button class="button" type="submit">Tìm kiếm</button>
+                    </form>
+                </li>
+                <li class="dropdown">
+                    <a class="dropbtn">Tài khoản</a>
+                    <div class="dropdown-content">
+                        <a href="#">Đăng nhập</a><br>
+                        <a href="#">Đăng ký</a>
+                    </div>
+                </li>
+                <li><img class="img"
+                        src="https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg" /></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="head">
+        <h1>Trang quản lý món ăn</h1>
+    </div>
+
+    <div id="boxmonan">
+        <h2 style="margin-left: 55px; margin-top: 15px; color: #f34949">Thêm món ăn</h2>
+        <form id="addForm">
+            <label for="id">ID:</label>
+            <input class="Osearch" type="text" id="id" required>
+
+            <label for="name">Tên món:</label>
+            <input class="Osearch" type="text" id="name" required>
+
+            <label for="price">Giá tiền:</label>
+            <input class="Osearch" type="text" id="price" required oninput="formatCurrency(this)">
+
+
+            <label for="image">Link Hình ảnh:</label>
+            <input class="Osearch" type="url" id="image">
+
+            <label for="description">Mô tả:</label>
+            <textarea class="Osearch" id="description" required></textarea>
+
+            <button class="button001" type="submit">Thêm món ăn</button>
+        </form>
+    </div>
+
+    <div>
+        <h2 id="text001">Danh sách món ăn:</h2>
+        <div class="width" id="danhsachmonan"></div>
+    </div>
+
+    <!-- Form để sửa đổi món ăn -->
+    <div id="editForm">
+        <h2>Sửa thông tin món ăn</h2>
+        <form id="updateForm">
+            <label for="edit-name">Tên món:</label>
+            <input type="text" id="edit-name" required>
+
+            <label for="edit-price">Giá tiền:</label>
+            <input class="Osearch" type="edit-text" id="price" required oninput="formatCurrency(this)">
+
+            <label for="edit-image">Link Hình ảnh:</label>
+            <input type="url" id="edit-image">
+
+            <label for="edit-description">Mô tả:</label>
+            <textarea id="edit-description" required></textarea>
+
+            <button type="submit">Cập nhật</button>
+        </form>
+    </div>
+
+    <script>
+        // Load danh sách món ăn khi trang được tải
+        $(document).ready(function () {
+            loadThemMon();
+
+            // Xử lý sự kiện submit form thêm món ăn
+            $('#addForm').submit(function (event) {
+                event.preventDefault();
+                ThemMonAn();
+            });
+
+            // Xử lý sự kiện khi click vào nút Sửa
+            $('#danhsachmonan').on('click', '.edit-btn', function () {
+                var dishCard = $(this).closest('.dish-card');
+                var id = dishCard.attr('data-id');
+                var name = dishCard.find('h3').text();
+                var price = dishCard.find('p').text().replace('Giá: ', '').replace(' VND', '');
+                var image = dishCard.find('img').attr('src');
+                var description = dishCard.find('div').text();
+
+                // Đổ dữ liệu vào form sửa đổi
+                $('#edit-name').val(name);
+                $('#edit-price').val(price);
+                $('#edit-image').val(image);
+                $('#edit-description').val(description);
+
+                // Lưu ID của món ăn vào form sửa đổi để dùng khi cập nhật
+                $('#editForm').attr('data-id', id);
+
+                // Hiển thị form sửa đổi
+                $('#editForm').fadeIn();
+            });
+
+            // Xử lý sự kiện submit form cập nhật món ăn
+            $('#editForm').on('submit', '#updateForm', function (event) {
+                event.preventDefault();
+                CapNhatMonAn();
+            });
+
+            // Xử lý sự kiện khi click vào nút Xoá
+            $('#danhsachmonan').on('click', '.delete-btn', function () {
+                var dishCard = $(this).closest('.dish-card');
+                var id = dishCard.attr('data-id');
+
+                if (confirm('Bạn có chắc muốn xoá món ăn này không?')) {
+                    XoaMonAn(id);
+                }
+            });
+        });
+
+        // Hàm gửi yêu cầu GET để load danh sách món ăn từ máy chủ
+        function loadThemMon() {
+            $.get("http://localhost:3000/monan", function (data, status) {
+                var dsmonan = $('#danhsachmonan');
+                dsmonan.empty();
+                for (var i = 0; i < data.length; i++) {
+                    // Tạo một thẻ dish-card mới
+                    var dishCard = $("<div class='dish-card' data-id='" + data[i].id + "'></div>");
+
+                    // Tạo thẻ hình ảnh và thêm vào dish-card
+                    var img = $("<img src='" + data[i].image + "' width='100%' height='50%' alt='Món 1'>");
+                    dishCard.append(img);
+
+                    // Tạo và thêm tiêu đề vào dish-card
+                    dishCard.append("<h3>" + data[i].name + "</h3>");
+
+                    // Tạo và thêm giá vào dish-card
+                    dishCard.append("<p>Giá: " + data[i].price + " VND</p>");
+
+                    // Tạo và thêm mô tả vào dish-card
+                    dishCard.append("<div>" + data[i].description + "</div><br>");
+
+                    // Tạo và thêm nút Sửa và Xoá vào dish-card
+                    dishCard.append("<a class='buttom edit-btn'>Sửa</a>");
+                    dishCard.append("<a class='buttom delete-btn'>Xoá</a>");
+
+                    // Thêm dish-card vào danh sách món ăn
+                    dsmonan.append(dishCard);
+                }
+            });
+        }
+
+        // Hàm gửi yêu cầu POST để thêm món ăn mới vào máy chủ
+        function ThemMonAn() {
+            var id = $('#id').val();
+            var name = $('#name').val();
+            var price = $('#price').val();
+            var image = $('#image').val();
+            var description = $('#description').val();
+
+            var cb = {
+                id: id,
+                name: name,
+                price: price,
+                image: image,
+                description: description,
+            };
+
+            $.ajax({
+                url: 'http://localhost:3000/monan',
+                type: 'POST',
+                data: JSON.stringify(cb),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    console.log(response);
+
+                    // Tạo một thẻ dish-card mới để hiển thị món ăn vừa thêm vào
+                    var dishCard = $("<div class='dish-card' data-id='" + response.id + "'></div>");
+                    dishCard.append("<img src='" + response.image + "' width='100%' height='50%' alt='Món 1'>");
+                    dishCard.append("<h3>" + response.name + "</h3>");
+                    dishCard.append("<p>Giá: " + response.price + " VND</p>");
+                    dishCard.append("<div>" + response.description + "</div><br>");
+                    dishCard.append("<a class='buttom edit-btn'>Sửa</a>");
+                    dishCard.append("<a class='buttom delete-btn'>Xoá</a>");
+
+                    // Thêm dish-card vào bảng danh sách món ăn
+                    $('#danhsachmonan').append(dishCard);
+
+                    // Đặt lại giá trị của các trường input
+                    $('#id').val('');
+                    $('#name').val('');
+                    $('#price').val('');
+                    $('#image').val('');
+                    $('#description').val('');
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        // Hàm gửi yêu cầu PUT để cập nhật thông tin món ăn
+        function CapNhatMonAn() {
+            var id = $('#editForm').attr('data-id');
+            var name = $('#edit-name').val();
+            var price = $('#edit-price').val();
+            var image = $('#edit-image').val();
+            var description = $('#edit-description').val();
+
+            var cb = {
+                id: id,
+                name: name,
+                price: price,
+                image: image,
+                description: description,
+            };
+
+            $.ajax({
+                url: 'http://localhost:3000/monan/' + id,
+                type: 'PUT',
+                data: JSON.stringify(cb),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    console.log(response);
+
+                    // Tìm dish-card có data-id tương ứng và cập nhật thông tin
+                    var dishCard = $('[data-id="' + response.id + '"]');
+                    dishCard.find('h3').text(response.name);
+                    dishCard.find('p').text('Giá: ' + response.price + ' VND');
+                    dishCard.find('img').attr('src', response.image);
+                    dishCard.find('div').text(response.description);
+
+                    // Ẩn form sửa đổi
+                    $('#editForm').fadeOut();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        // Hàm gửi yêu cầu DELETE để xoá món ăn
+        function XoaMonAn(id) {
+            $.ajax({
+                url: 'http://localhost:3000/monan/' + id,
+                type: 'DELETE',
+                success: function (response) {
+                    console.log(response);
+                    // Xoá dish-card có data-id tương ứng
+                    $('[data-id="' + id + '"]').remove();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        //Hàm chuyển đổi sô s tiền thêm dấu , mỗi 3 chữ số
+        function formatCurrency(input) {
+            // Chuyển đổi input thành chuỗi và loại bỏ dấu phẩy hiện có (nếu có)
+            var value = input.value.replace(/\D/g, "");
+            // Sử dụng NumberFormat để thêm dấu phẩy mỗi 3 chữ số
+            var formatter = new Intl.NumberFormat('en-US');
+            input.value = formatter.format(value);
+        }
+
+    </script>
+
+</body>
+
+</html>

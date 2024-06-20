@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css" type="text/css" />
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<title>Đặt đồ ăn trực tuyến</title>
+
+</head>
+
+<body>
+    <div>
+        <header>
+            <nav>
+                <ul>
+                    <li>
+                        <h1>FoodKun</h1>
+                    </li>
+                    <li><a href="TrangChu.html">Trang Chủ</a></li>
+                    <li><a href="QuanLimonAn.html">Món Ăn</a></li>
+                    <li><a href="DatHang.html">Đặt Hàng</a></li>
+                    <li>
+                        <form>
+                            <input class="search" type="text" id="searchInput" placeholder="Tìm kiếm...">
+                            <button class="button" type="submit">Tìm kiếm</button>
+                        </form>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropbtn">Tài khoản</a>
+                        <div class="dropdown-content">
+                            <a href="#">Đăng nhập</a><br>
+                            <a href="#">Đăng ký</a>
+                        </div>
+                    </li>
+                    <li><img class="img"
+                            src="https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg" /></li>
+                </ul>
+            </nav>
+        </header>
+        <main>
+            <br>
+            <center>
+                <h1>Chào mừng bạn đến với trang đặt đồ ăn của chúng tôi</h1>
+            </center>
+            <h2 id="text001">Đề xuất:</h2>
+
+            <div class="width" id="danhsachmonan"></div>
+
+            <img class="img1"
+                src="https://www.hoteljob.vn/files/Anh-Hoteljob-Ni/Nam-2019/Thang-12/bi-quyet-chup-anh-mon-an-dep-01.png" />
+        </main>
+        
+    </div>
+    <script>
+
+        loadThemMon();
+        function loadThemMon() {
+            $.get("http://localhost:3000/monan", function (data, status) {
+                var dsmonan = $('#danhsachmonan');
+                dsmonan.empty();
+                for (var i = 0; i < data.length; i++) {
+                    // Tạo một thẻ dish-card mới
+                    var dishCard = $("<div class='dish-card'></div>");
+
+                    // Tạo thẻ hình ảnh và thêm vào dish-card
+                    var img = $("<img src='" + data[i].image + "' width='100%' height='50%'  alt='Món 1'>");
+                    dishCard.append(img);
+
+                    // Tạo và thêm tiêu đề vào dish-card
+                    dishCard.append("<h3>" + data[i].name + "</h3>");
+
+                    // Tạo và thêm giá vào dish-card
+                    dishCard.append("<p>Giá: " + data[i].price + " VND</p>");
+
+                    // Tạo và thêm mô tả vào dish-card
+                    dishCard.append("<div>" + data[i].description + "</div><br>");
+
+                    // Tạo và thêm nút đặt hàng vào dish-card
+                    dishCard.append("<a class='buttom' href=''>Đặt hàng</a>");
+
+                    // Thêm dish-card vào danh sách món ăn
+                    dsmonan.append(dishCard);
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>
